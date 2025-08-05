@@ -14,14 +14,16 @@ func Access() fiber.Handler {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Missing Authorization header",
+				"status":  false,
+				"message": "Missing Authorization header",
 			})
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid Authorization format",
+				"status":  false,
+				"message": "Invalid Authorization format",
 			})
 		}
 
@@ -36,7 +38,8 @@ func Access() fiber.Handler {
 		})
 		if err != nil || !token.Valid {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid or expired token",
+				"status":  false,
+				"message": "Invalid or expired token",
 			})
 		}
 

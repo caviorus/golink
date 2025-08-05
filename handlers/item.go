@@ -77,7 +77,16 @@ func (h *ItemHandler) GetItem(c *fiber.Ctx) error {
 }
 
 func (h *ItemHandler) GetAllItems(c *fiber.Ctx) error {
-	items, err := h.repo.GetAllItems()
+	limit, err := strconv.Atoi(c.Query("limit", "10"))
+	if err != nil {
+		limit = 10
+	}
+	offset, err := strconv.Atoi(c.Query("start", "0"))
+	if err != nil {
+		offset = 0
+	}
+
+	items, total, err := h.repo.GetAllItems(limit, offset)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
@@ -88,7 +97,10 @@ func (h *ItemHandler) GetAllItems(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
-		"data":    items,
+		"data": fiber.Map{
+			"items": items,
+			"total": total,
+		},
 	})
 }
 

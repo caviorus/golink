@@ -33,10 +33,16 @@ func (r *ItemRepository) GetItemByID(id uint64) (*models.Item, error) {
 	return &item, nil
 }
 
-func (r *ItemRepository) GetAllItems() ([]models.Item, error) {
+func (r *ItemRepository) GetAllItems(limit int, offset int) ([]models.Item, int64, error) {
 	var items []models.Item
-	err := r.db.Preload("Subcategory.Category").Find(&items).Error
-	return items, err
+	var total int64
+
+	if err := r.db.Model(&models.Item{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := r.db.Preload("Subcategory.Category").Limit(limit).Offset(offset).Find(&items).Error
+	return items, total, err
 }
 
 func (r *ItemRepository) UpdateItem(item *models.Item) error {
