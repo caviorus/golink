@@ -41,7 +41,7 @@ func (r *ItemRepository) GetAllItems(limit int, offset int) ([]models.Item, int6
 		return nil, 0, err
 	}
 
-	err := r.db.Preload("Subcategory.Category").Limit(limit).Offset(offset).Find(&items).Error
+	err := r.db.Preload("Subcategory.Category").Order("name ASC").Limit(limit).Offset(offset).Find(&items).Error
 	return items, total, err
 }
 
@@ -51,6 +51,30 @@ func (r *ItemRepository) UpdateItem(item *models.Item) error {
 
 func (r *ItemRepository) DeleteItem(id uint64) error {
 	return r.db.Delete(&models.Item{}, id).Error
+}
+
+func (r *ItemRepository) CreateItemImage(image *models.ItemImages) error {
+	return r.db.Create(image).Error
+}
+
+func (r *ItemRepository) GetItemImages(itemID uint64) ([]models.ItemImages, error) {
+	var images []models.ItemImages
+	err := r.db.Where("item_id = ?", itemID).Find(&images).Error
+	if err != nil {
+		return nil, err
+	}
+	return images, nil
+}
+func (r *ItemRepository) GetItemImagesByID(imageID uint64) (*models.ItemImages, error) {
+	var image models.ItemImages
+	err := r.db.First(&image, imageID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &image, nil
+}
+func (r *ItemRepository) DeleteItemImage(imageID uint64) error {
+	return r.db.Where("id = ?", imageID).Delete(&models.ItemImages{}).Error
 }
 
 // ItemSubcategory CRUD Operations
@@ -69,6 +93,18 @@ func (r *ItemRepository) GetSubcategoryByID(id uint64) (*models.ItemSubcategory,
 		return nil, err
 	}
 	return &subcategory, nil
+}
+
+func (r *ItemRepository) GetSubcategoryByCategoryID(id uint64) ([]models.ItemSubcategory, error) {
+	var subcategory []models.ItemSubcategory
+	err := r.db.Preload("Category").Where("category_id = ?", id).Find(&subcategory).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("subcategory not found")
+		}
+		return nil, err
+	}
+	return subcategory, nil
 }
 
 func (r *ItemRepository) GetAllSubcategories() ([]models.ItemSubcategory, error) {

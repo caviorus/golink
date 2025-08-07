@@ -10,7 +10,7 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
-	app.Post("/login", handlers.Login)
+	app.Post("/api/signin", handlers.Login)
 
 	// Initialize repositories and handlers
 	itemRepo := repositories.NewItemRepository(db)
@@ -39,6 +39,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	categories.Post("/", itemHandler.CreateCategory)
 	categories.Get("/", itemHandler.GetAllCategories)
 	categories.Get("/:id", itemHandler.GetCategory)
+	categories.Get("/:id/subcategories", itemHandler.GetSubcategoryByCategoryID)
 	categories.Put("/:id", itemHandler.UpdateCategory)
 	categories.Delete("/:id", itemHandler.DeleteCategory)
 }

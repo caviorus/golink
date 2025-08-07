@@ -57,6 +57,36 @@ func (h *ItemHandler) GetSubcategory(c *fiber.Ctx) error {
 	})
 }
 
+func (h *ItemHandler) GetSubcategoryByCategoryID(c *fiber.Ctx) error {
+	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status": false,
+			"error":  "invalid ID",
+		})
+	}
+
+	subcategory, err := h.repo.GetSubcategoryByCategoryID(id)
+	if err != nil {
+		if err.Error() == "subcategory not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"status":  false,
+				"message": err.Error(),
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  true,
+		"message": "Success",
+		"data":    subcategory,
+	})
+}
+
 func (h *ItemHandler) GetAllSubcategories(c *fiber.Ctx) error {
 	subcategories, err := h.repo.GetAllSubcategories()
 	if err != nil {

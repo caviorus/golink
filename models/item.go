@@ -1,5 +1,12 @@
 package models
 
+type ItemImages struct {
+	BaseID
+	ItemID uint64 `json:"item_id" gorm:"not null"`
+	Type   string `json:"type" gorm:"type:varchar(20)"` //add comment : type = URL/PATH
+	URL    string `json:"url" gorm:"type:varchar(255)"`
+}
+
 type Item struct {
 	BaseID
 	Name          string          `gorm:"type:varchar(100)" json:"name"`
