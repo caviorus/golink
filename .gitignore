@@ -9,6 +9,7 @@
 
 # Output of go build
 /build/
+/assets/images/
 bin/
 dist/
 *.log
