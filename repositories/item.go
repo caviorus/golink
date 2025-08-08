@@ -33,7 +33,7 @@ func (r *ItemRepository) GetItemByID(id uint64) (*models.Item, error) {
 	return &item, nil
 }
 
-func (r *ItemRepository) GetAllItems(limit int, offset int) ([]models.Item, int64, error) {
+func (r *ItemRepository) GetAllItems(limit int, offset int, sort string, sort_direction string) ([]models.Item, int64, error) {
 	var items []models.Item
 	var total int64
 
@@ -41,7 +41,7 @@ func (r *ItemRepository) GetAllItems(limit int, offset int) ([]models.Item, int6
 		return nil, 0, err
 	}
 
-	err := r.db.Preload("Subcategory.Category").Order("name ASC").Limit(limit).Offset(offset).Find(&items).Error
+	err := r.db.Preload("Subcategory.Category").Order(sort + " " + sort_direction).Limit(limit).Offset(offset).Find(&items).Error
 	return items, total, err
 }
 

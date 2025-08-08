@@ -88,8 +88,10 @@ func (h *ItemHandler) GetAllItems(c *fiber.Ctx) error {
 	if err != nil {
 		offset = 0
 	}
+	sort := c.Query("sort", "name")
+	sort_direction := c.Query("sortDirection", "asc")
 
-	items, total, err := h.repo.GetAllItems(limit, offset)
+	items, total, err := h.repo.GetAllItems(limit, offset, sort, sort_direction)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
