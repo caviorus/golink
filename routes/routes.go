@@ -10,6 +10,8 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
+	app.Static("/assets", "./assets/")
+
 	app.Post("/api/signin", handlers.Login)
 
 	// Initialize repositories and handlers
@@ -25,6 +27,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	items.Get("/:id", itemHandler.GetItem)
 	items.Put("/:id", itemHandler.UpdateItem)
 	items.Delete("/:id", itemHandler.DeleteItem)
+
+	//item images
+	items.Post("/images", itemHandler.UploadItemImages)
+	items.Delete("/images/:id", itemHandler.DeleteItemImage)
 
 	// Subcategory routes
 	subcategories := api.Group("/subcategories")

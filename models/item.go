@@ -3,8 +3,7 @@ package models
 type ItemImages struct {
 	BaseID
 	ItemID uint64 `json:"item_id" gorm:"not null"`
-	Type   string `json:"type" gorm:"type:varchar(20)"` //add comment : type = URL/PATH
-	URL    string `json:"url" gorm:"type:varchar(255)"`
+	Image  string `json:"image" gorm:"type:text"`
 }
 
 type Item struct {
@@ -16,6 +15,7 @@ type Item struct {
 	Thumbnail     string          `gorm:"type:varchar(255)" json:"thumbnail"`
 	SubcategoryID uint64          `json:"subcategory_id" gorm:"not null"`
 	Subcategory   ItemSubcategory `gorm:"foreignKey:SubcategoryID" json:"subcategory,omitempty"`
+	ItemImages    []ItemImages    `gorm:"foreignKey:ItemID" json:"item_images"`
 }
 
 type ItemSubcategory struct {

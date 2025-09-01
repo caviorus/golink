@@ -3,6 +3,7 @@ package repositories
 import (
 	"errors"
 	"golink/models"
+	"os"
 
 	"gorm.io/gorm"
 )
@@ -23,7 +24,7 @@ func (r *ItemRepository) CreateItem(item *models.Item) error {
 
 func (r *ItemRepository) GetItemByID(id uint64) (*models.Item, error) {
 	var item models.Item
-	err := r.db.Preload("Subcategory.Category").First(&item, id).Error
+	err := r.db.Preload("Subcategory.Category").Preload("ItemImages").First(&item, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("item not found")
@@ -41,12 +42,12 @@ func (r *ItemRepository) GetAllItems(limit int, offset int, sort string, sort_di
 		return nil, 0, err
 	}
 
-	err := r.db.Preload("Subcategory.Category").Order(sort + " " + sort_direction).Limit(limit).Offset(offset).Find(&items).Error
+	err := r.db.Preload("Subcategory.Category").Preload("ItemImages").Order(sort + " " + sort_direction).Limit(limit).Offset(offset).Find(&items).Error
 	return items, total, err
 }
 
-func (r *ItemRepository) UpdateItem(item *models.Item) error {
-	return r.db.Save(item).Error
+func (r *ItemRepository) UpdateItem(id uint64, item *map[string]interface{}) error {
+	return r.db.Model(&models.Item{}).Where("id = ?", id).Updates(item).Error
 }
 
 func (r *ItemRepository) DeleteItem(id uint64) error {
@@ -74,6 +75,10 @@ func (r *ItemRepository) GetItemImagesByID(imageID uint64) (*models.ItemImages, 
 	return &image, nil
 }
 func (r *ItemRepository) DeleteItemImage(imageID uint64) error {
+	image, err := r.GetItemImagesByID(imageID)
+	if err == nil && image != nil {
+		os.Remove("./assets/images/items/" + image.Image)
+	}
 	return r.db.Where("id = ?", imageID).Delete(&models.ItemImages{}).Error
 }
 

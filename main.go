@@ -22,6 +22,7 @@ func main() {
 		&models.ItemCategory{},
 		&models.ItemSubcategory{},
 		&models.Item{},
+		&models.ItemImages{},
 	)
 	if err != nil {
 		panic("Failed to migrate database")
