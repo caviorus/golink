@@ -20,10 +20,10 @@ func NewItemHandler(repo *repositories.ItemRepository) *ItemHandler {
 
 // Item Handlers
 
-func (h *ItemHandler) CreateItem(c *fiber.Ctx) error {
-	var data map[string]interface{}
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+func (itemHandler *ItemHandler) CreateItem(context *fiber.Ctx) error {
+	var data MapInterface
+	if err := context.BodyParser(&data); err != nil {
+		return context.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	name := data["name"].(string)
@@ -34,7 +34,7 @@ func (h *ItemHandler) CreateItem(c *fiber.Ctx) error {
 
 	subcategoryIDUint, err := strconv.ParseUint(fmt.Sprintf("%.0f", subcategoryID), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid subcategory_id",
 		})
@@ -48,38 +48,38 @@ func (h *ItemHandler) CreateItem(c *fiber.Ctx) error {
 		Type:          _type,
 	}
 
-	if err := h.repo.CreateItem(&item); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := itemHandler.repo.CreateItem(&item); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+	return context.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    item,
 	})
 }
 
-func (h *ItemHandler) GetItem(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (itemHandler *ItemHandler) GetItem(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	item, err := h.repo.GetItemByID(id)
+	item, err := itemHandler.repo.GetItemByID(id)
 	if err != nil {
 		if err.Error() == "item not found" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			return context.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  false,
 				"message": err.Error(),
 			})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
@@ -89,34 +89,34 @@ func (h *ItemHandler) GetItem(c *fiber.Ctx) error {
 	for i := 0; i < len(item.ItemImages); i++ {
 		item.ItemImages[i].Image = utils.CreateImageLink(item.ItemImages[i].Image)
 	}
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    item,
 	})
 }
 
-func (h *ItemHandler) GetAllItems(c *fiber.Ctx) error {
-	limit, err := strconv.Atoi(c.Query("limit", "10"))
+func (itemHandler *ItemHandler) GetAllItems(context *fiber.Ctx) error {
+	limit, err := strconv.Atoi(context.Query("limit", "10"))
 	if err != nil {
 		limit = 10
 	}
-	offset, err := strconv.Atoi(c.Query("start", "0"))
+	offset, err := strconv.Atoi(context.Query("start", "0"))
 	if err != nil {
 		offset = 0
 	}
-	sort := c.Query("sort", "name")
-	sort_direction := c.Query("sortDirection", "asc")
+	sort := context.Query("sort", "name")
+	sort_direction := context.Query("sortDirection", "asc")
 
-	items, total, err := h.repo.GetAllItems(limit, offset, sort, sort_direction)
+	items, total, err := itemHandler.repo.GetAllItems(limit, offset, sort, sort_direction)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data": fiber.Map{
@@ -126,64 +126,64 @@ func (h *ItemHandler) GetAllItems(c *fiber.Ctx) error {
 	})
 }
 
-func (h *ItemHandler) UpdateItem(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (itemHandler *ItemHandler) UpdateItem(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	name := c.FormValue("name")
-	link := c.FormValue("link")
-	_type := c.FormValue("type")
-	description := c.FormValue("description")
-	subcategoryIDStr := c.FormValue("subcategory_id")
+	name := context.FormValue("name")
+	link := context.FormValue("link")
+	_type := context.FormValue("type")
+	description := context.FormValue("description")
+	subcategoryIDStr := context.FormValue("subcategory_id")
 	subcategoryIDUint, err := strconv.ParseUint(subcategoryIDStr, 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid subcategory_id",
 		})
 	}
 
-	if err := h.repo.UpdateItem(id, &map[string]interface{}{
+	if err := itemHandler.repo.UpdateItem(id, &map[string]interface{}{
 		"name":           name,
 		"subcategory_id": subcategoryIDUint,
 		"link":           link,
 		"description":    description,
 		"type":           _type,
 	}); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 	})
 }
 
-func (h *ItemHandler) DeleteItem(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (itemHandler *ItemHandler) DeleteItem(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	if err := h.repo.DeleteItem(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := itemHandler.repo.DeleteItem(id); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Item deleted successfully",
 	})

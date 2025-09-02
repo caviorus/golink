@@ -11,10 +11,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Login(c *fiber.Ctx) error {
+func Login(context *fiber.Ctx) error {
 	var input models.User
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := context.BodyParser(&input); err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "Invalid input",
 		})
@@ -22,7 +22,7 @@ func Login(c *fiber.Ctx) error {
 
 	var user models.User
 	if err := config.DB.Where("username = ?", input.Username).First(&user).Error; err != nil || !utils.CheckPasswordHash(input.Password, user.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"status":  false,
 			"message": "Invalid credentials",
 		})
@@ -36,13 +36,13 @@ func Login(c *fiber.Ctx) error {
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": "Token error",
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status": true,
 		"token":  tokenString,
 	})

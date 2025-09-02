@@ -12,118 +12,118 @@ import (
 var validate = validator.New()
 
 // ItemCategory Handlers
-func (h *ItemHandler) CreateCategory(c *fiber.Ctx) error {
+func (handler *ItemHandler) CreateCategory(context *fiber.Ctx) error {
 	var category models.ItemCategory
-	if err := c.BodyParser(&category); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, err.Error())
+	if err := context.BodyParser(&category); err != nil {
+		return utils.ErrorResponse(context, fiber.StatusBadRequest, err.Error())
 	}
 
 	if err := validate.Struct(category); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, err.Error())
+		return utils.ErrorResponse(context, fiber.StatusBadRequest, err.Error())
 	}
 
-	if err := h.repo.CreateCategory(&category); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+	if err := handler.repo.CreateCategory(&category); err != nil {
+		return utils.ErrorResponse(context, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return utils.SuccessResponse(c, fiber.StatusCreated, category)
+	return utils.SuccessResponse(context, fiber.StatusCreated, category)
 }
 
-func (h *ItemHandler) GetCategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) GetCategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	category, err := h.repo.GetCategoryByID(id)
+	category, err := handler.repo.GetCategoryByID(id)
 	if err != nil {
 		if err.Error() == "category not found" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			return context.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  false,
 				"message": err.Error(),
 			})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    category,
 	})
 }
 
-func (h *ItemHandler) GetAllCategories(c *fiber.Ctx) error {
-	categories, err := h.repo.GetAllCategories()
+func (handler *ItemHandler) GetAllCategories(context *fiber.Ctx) error {
+	categories, err := handler.repo.GetAllCategories()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    categories,
 	})
 }
 
-func (h *ItemHandler) UpdateCategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) UpdateCategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
 	var category models.ItemCategory
-	if err := c.BodyParser(&category); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := context.BodyParser(&category); err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
 	category.ID = id
-	if err := h.repo.UpdateCategory(&category); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := handler.repo.UpdateCategory(&category); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    category,
 	})
 }
 
-func (h *ItemHandler) DeleteCategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) DeleteCategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	if err := h.repo.DeleteCategory(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := handler.repo.DeleteCategory(id); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"message": "Category deleted successfully",
 	})
 }

@@ -12,19 +12,19 @@ import (
 )
 
 // func to upload items images
-func (h *ItemHandler) UploadItemImages(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.FormValue("id"), 10, 64)
+func (handler *ItemHandler) UploadItemImages(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.FormValue("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 			"error":   err.Error(),
 		})
 	}
 
-	item, err := h.repo.GetItemByID(id)
+	item, err := handler.repo.GetItemByID(id)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		return context.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  false,
 			"message": "item not found",
 		})
@@ -32,7 +32,7 @@ func (h *ItemHandler) UploadItemImages(c *fiber.Ctx) error {
 
 	name := item.Name
 
-	thumbnail, err := c.FormFile("thumbnail")
+	thumbnail, err := context.FormFile("thumbnail")
 	if err == nil {
 		ext := filepath.Ext(thumbnail.Filename)
 		thumbnailName := fmt.Sprintf("%s-%s%s",
@@ -41,13 +41,13 @@ func (h *ItemHandler) UploadItemImages(c *fiber.Ctx) error {
 			ext,
 		)
 		path := fmt.Sprintf("./assets/images/items/%s", thumbnailName)
-		_ = c.SaveFile(thumbnail, path)
-		h.repo.UpdateItem(id, &map[string]interface{}{
+		_ = context.SaveFile(thumbnail, path)
+		handler.repo.UpdateItem(id, &map[string]interface{}{
 			"thumbnail": thumbnailName,
 		})
 	}
 
-	form, err := c.MultipartForm()
+	form, err := context.MultipartForm()
 	if err == nil && form != nil {
 		images := form.File["images[]"]
 		for _, image := range images {
@@ -58,43 +58,43 @@ func (h *ItemHandler) UploadItemImages(c *fiber.Ctx) error {
 				ext,
 			)
 			path := fmt.Sprintf("./assets/images/items/%s", imageName)
-			_ = c.SaveFile(image, path)
+			_ = context.SaveFile(image, path)
 
 			//save file name to itemImage
-			h.repo.CreateItemImage(&models.ItemImages{
+			handler.repo.CreateItemImage(&models.ItemImages{
 				ItemID: item.ID,
 				Image:  imageName,
 			})
 		}
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Images uploaded successfully",
 	})
 
 }
 
-func (h *ItemHandler) DeleteItemImage(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) DeleteItemImage(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": "invalid ID",
 		})
 	}
 
-	image, err := h.repo.GetItemImagesByID(id)
+	image, err := handler.repo.GetItemImagesByID(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
 	os.Remove(image.Image)
-	h.repo.DeleteItemImage(image.ID)
-	return c.JSON(fiber.Map{
+	handler.repo.DeleteItemImage(image.ID)
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Image deleted successfully",
 	})

@@ -10,141 +10,141 @@ import (
 
 // ItemSubcategory Handlers
 
-func (h *ItemHandler) CreateSubcategory(c *fiber.Ctx) error {
+func (handler *ItemHandler) CreateSubcategory(context *fiber.Ctx) error {
 	var subcategory models.ItemSubcategory
-	if err := c.BodyParser(&subcategory); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, err.Error())
+	if err := context.BodyParser(&subcategory); err != nil {
+		return utils.ErrorResponse(context, fiber.StatusBadRequest, err.Error())
 	}
 
-	if err := utils.ValidateStruct(c, &subcategory); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusBadRequest, err.Error())
+	if err := utils.ValidateStruct(context, &subcategory); err != nil {
+		return utils.ErrorResponse(context, fiber.StatusBadRequest, err.Error())
 	}
 
-	if err := h.repo.CreateSubcategory(&subcategory); err != nil {
-		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+	if err := handler.repo.CreateSubcategory(&subcategory); err != nil {
+		return utils.ErrorResponse(context, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return utils.SuccessResponse(c, fiber.StatusCreated, subcategory)
+	return utils.SuccessResponse(context, fiber.StatusCreated, subcategory)
 }
 
-func (h *ItemHandler) GetSubcategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) GetSubcategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status": false,
 			"error":  "invalid ID",
 		})
 	}
 
-	subcategory, err := h.repo.GetSubcategoryByID(id)
+	subcategory, err := handler.repo.GetSubcategoryByID(id)
 	if err != nil {
 		if err.Error() == "subcategory not found" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			return context.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  false,
 				"message": err.Error(),
 			})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    subcategory,
 	})
 }
 
-func (h *ItemHandler) GetSubcategoryByCategoryID(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) GetSubcategoryByCategoryID(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status": false,
 			"error":  "invalid ID",
 		})
 	}
 
-	subcategory, err := h.repo.GetSubcategoryByCategoryID(id)
+	subcategory, err := handler.repo.GetSubcategoryByCategoryID(id)
 	if err != nil {
 		if err.Error() == "subcategory not found" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			return context.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"status":  false,
 				"message": err.Error(),
 			})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    subcategory,
 	})
 }
 
-func (h *ItemHandler) GetAllSubcategories(c *fiber.Ctx) error {
-	subcategories, err := h.repo.GetAllSubcategories()
+func (handler *ItemHandler) GetAllSubcategories(context *fiber.Ctx) error {
+	subcategories, err := handler.repo.GetAllSubcategories()
 	if err != nil {
-		return utils.ErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+		return utils.ErrorResponse(context, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return utils.SuccessResponse(c, fiber.StatusOK, subcategories)
+	return utils.SuccessResponse(context, fiber.StatusOK, subcategories)
 }
 
-func (h *ItemHandler) UpdateSubcategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) UpdateSubcategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status": false,
 			"error":  "invalid ID",
 		})
 	}
 
 	var subcategory models.ItemSubcategory
-	if err := c.BodyParser(&subcategory); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	if err := context.BodyParser(&subcategory); err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
 	subcategory.ID = id
-	if err := h.repo.UpdateSubcategory(&subcategory); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := handler.repo.UpdateSubcategory(&subcategory); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
 		"data":    subcategory,
 	})
 }
 
-func (h *ItemHandler) DeleteSubcategory(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 64)
+func (handler *ItemHandler) DeleteSubcategory(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status": false,
 			"error":  "invalid ID",
 		})
 	}
 
-	if err := h.repo.DeleteSubcategory(id); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	if err := handler.repo.DeleteSubcategory(id); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(fiber.Map{
+	return context.JSON(fiber.Map{
 		"message": "Subcategory deleted successfully",
 	})
 }
