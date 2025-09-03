@@ -31,6 +31,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	//item images
 	items.Post("/images", itemHandler.UploadItemImages)
 	items.Delete("/images/:id", itemHandler.DeleteItemImage)
+	items.Delete("/thumbnails/:id", itemHandler.DeleteItemThumbnail)
 
 	// Subcategory routes
 	subcategories := api.Group("/subcategories")

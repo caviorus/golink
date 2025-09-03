@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"golink/models"
 	"golink/utils"
-	"os"
 	"path/filepath"
 	"strconv"
 
@@ -92,8 +91,31 @@ func (handler *ItemHandler) DeleteItemImage(context *fiber.Ctx) error {
 		})
 	}
 
-	os.Remove(image.Image)
 	handler.repo.DeleteItemImage(image.ID)
+	return context.JSON(fiber.Map{
+		"status":  true,
+		"message": "Image deleted successfully",
+	})
+}
+
+func (handler *ItemHandler) DeleteItemThumbnail(context *fiber.Ctx) error {
+	id, err := strconv.ParseUint(context.Params("id"), 10, 64)
+	if err != nil {
+		return context.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  false,
+			"message": "invalid ID",
+		})
+	}
+
+	item, err := handler.repo.GetItemByID(id)
+	if err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  false,
+			"message": err.Error(),
+		})
+	}
+
+	handler.repo.DeleteItemThumbnail(item.ID)
 	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Image deleted successfully",

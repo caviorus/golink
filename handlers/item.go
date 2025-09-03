@@ -119,10 +119,8 @@ func (itemHandler *ItemHandler) GetAllItems(context *fiber.Ctx) error {
 	return context.JSON(fiber.Map{
 		"status":  true,
 		"message": "Success",
-		"data": fiber.Map{
-			"items": items,
-			"total": total,
-		},
+		"data":    items,
+		"total":   total,
 	})
 }
 

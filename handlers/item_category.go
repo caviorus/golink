@@ -60,7 +60,7 @@ func (handler *ItemHandler) GetCategory(context *fiber.Ctx) error {
 }
 
 func (handler *ItemHandler) GetAllCategories(context *fiber.Ctx) error {
-	categories, err := handler.repo.GetAllCategories()
+	categories, total, err := handler.repo.GetAllCategories()
 	if err != nil {
 		return context.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  false,
@@ -72,6 +72,7 @@ func (handler *ItemHandler) GetAllCategories(context *fiber.Ctx) error {
 		"status":  true,
 		"message": "Success",
 		"data":    categories,
+		"total":   total,
 	})
 }
 

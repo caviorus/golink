@@ -82,6 +82,14 @@ func (repo *ItemRepository) DeleteItemImage(imageID uint64) error {
 	return repo.db.Where("id = ?", imageID).Delete(&models.ItemImages{}).Error
 }
 
+func (repo *ItemRepository) DeleteItemThumbnail(itemID uint64) error {
+	item, err := repo.GetItemByID(itemID)
+	if err == nil && item != nil {
+		os.Remove("./assets/images/items/" + item.Thumbnail)
+	}
+	return repo.db.Model(&models.Item{}).Where("id = ?", itemID).Update("thumbnail", "").Error
+}
+
 // ItemSubcategory CRUD Operations
 
 func (repo *ItemRepository) CreateSubcategory(subcategory *models.ItemSubcategory) error {
@@ -144,10 +152,17 @@ func (repo *ItemRepository) GetCategoryByID(id uint64) (*models.ItemCategory, er
 	return &category, nil
 }
 
-func (repo *ItemRepository) GetAllCategories() ([]models.ItemCategory, error) {
+func (repo *ItemRepository) GetAllCategories() ([]models.ItemCategory, int64, error) {
+
 	var categories []models.ItemCategory
+	var total int64
+
+	if err := repo.db.Model(&models.ItemCategory{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	err := repo.db.Find(&categories).Error
-	return categories, err
+	return categories, total, err
 }
 
 func (repo *ItemRepository) UpdateCategory(category *models.ItemCategory) error {

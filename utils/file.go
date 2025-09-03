@@ -7,7 +7,10 @@ import (
 
 func CreateImageLink(path string) string {
 	var host = os.Getenv("HOST")
-	return fmt.Sprintf("%s/assets/images/items/%s", host, path)
+	if path == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s/assets/images/items/%s%s", host, path, "?time="+GetCurrentDateTimeString())
 }
 
 func CreateImageLinks(images []string) []string {
